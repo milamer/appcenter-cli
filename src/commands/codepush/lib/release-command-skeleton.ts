@@ -55,6 +55,12 @@ export default class CodePushReleaseCommandSkeleton extends AppCommand {
   @hasArg
   public privateKeyPath: string;
 
+  @help("Specifies the passphrase for the provided RSA private key." + chalk.yellow("NOTICE:") + " WARNING! Using --passphrase via the CLI is insecure and can only be used in combination with an encrypted private key!")
+  @shortName("P")
+  @longName("passphrase")
+  @hasArg
+  public privateKeyPassphrase: string;
+
   @help("When this flag is set, releasing a package that is identical to the latest release will produce a warning instead of an error")
   @longName("disable-duplicate-release-error")
   public disableDuplicateReleaseError: boolean;
@@ -107,7 +113,7 @@ export default class CodePushReleaseCommandSkeleton extends AppCommand {
         await moveReleaseFilesInTmpFolder(this.updateContentsPath).then((tmpPath: string) => { this.updateContentsPath = tmpPath; });
       }
 
-      await sign(this.privateKeyPath, this.updateContentsPath);
+      await sign(this.privateKeyPath, this.updateContentsPath, this.privateKeyPassphrase);
     }
 
     const updateContentsZipPath = await zip(this.updateContentsPath);

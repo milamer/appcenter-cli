@@ -13,7 +13,7 @@ interface CodeSigningClaims {
   contentHash: string;
 }
 
-export default async function sign(privateKeyPath: string, updateContentsPath: string): Promise<void> {
+export default async function sign(privateKeyPath: string, updateContentsPath: string, privateKeyPassphrase?: string): Promise<void> {
   if (!privateKeyPath) {
     return Promise.resolve<void>(null);
   }
@@ -63,7 +63,10 @@ export default async function sign(privateKeyPath: string, updateContentsPath: s
   };
 
   return new Promise<void>((resolve, reject) => {
-    jwt.sign(claims, privateKey, { algorithm: "RS256" }, async (err: Error, signedJwt: string) => {
+    // jsonwebtoken's Secret type is not accurate as a Buffer is not allowed as a key
+    const privateKeyOrKeyAndPassphrase = privateKeyPassphrase ? { key: privateKey as any, passphrase: privateKeyPassphrase } : privateKey;
+
+    jwt.sign(claims, privateKeyOrKeyAndPassphrase, { algorithm: "RS256" }, async (err: Error, signedJwt: string) => {
       if (err) {
         reject(new Error("The specified signing key file was not valid"));
       }
